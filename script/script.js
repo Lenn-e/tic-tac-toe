@@ -11,7 +11,7 @@ const board = (() => {
         [[0, 2], [1, 1], [2, 0]],
     ]
 
-    const boardArray = [[], [], []];
+    let boardArray = [[], [], []];
 
     const registerMove = (player, row, column) => {
         // check if the square is empty and write in it then return true so we know if the move was successful
@@ -53,10 +53,27 @@ const board = (() => {
         });
     }
 
+    const checkDraw = () => {
+        for(let i = 0; i < 3; i++) {
+            for(let j = 0; j < 3; j++) {
+                if(boardArray[i][j] === undefined) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
+
+    const reset = () => {
+        boardArray = [[], [], []];
+    }
+
     return {
         registerMove,
         getBoardState,
-        checkWinner
+        checkWinner,
+        checkDraw,
+        reset
     };
 })();
 
@@ -90,16 +107,24 @@ const game = (() => {
             // write win logic
             console.log(`${currentPlayer.side} won this round!`)
             newRound();
+            return true;
+        } else if(board.checkDraw()) {
+            console.log("It's a draw");
+            newRound();
+            return true;
         }
-        // write draw logic
+        return false;
     }
 
     const makeMove = (row, column) => {
         if(board.registerMove(currentPlayer, row, column)) {
             // the move was legal so check for win or draw
-            checkRoundState();
+            let isGameOver = checkRoundState();
             // if the game hasn't ended switch to next player
             currentPlayer = currentPlayer === player1 ? player2 : player1;
+            
+            // return boolean that lets the controller know if the game is over
+            return isGameOver;
         } else {
             // do nothing and let the same player make another move
         }
@@ -134,7 +159,9 @@ const displayController = (() => {
             let squareCol = coordinates[1];
             if(square.textContent != 'X' && square.textContent != 'O') {
                 square.textContent = game.getCurrentPlayer().side;
-                game.makeMove(squareRow, squareCol);
+                if(game.makeMove(squareRow, squareCol)) {
+                    // write code that redraws the board
+                }
             }
         }
     }
