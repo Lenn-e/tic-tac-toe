@@ -1,5 +1,5 @@
 // used for tracking board state
-const gameBoard = (() => {
+const board = (() => {
     const WINNING_COMBINATIONS = [
         [[0, 0], [0, 1], [0, 2]],
         [[1, 0], [1, 1], [1, 2]],
@@ -57,7 +57,7 @@ const gameBoard = (() => {
         registerMove,
         getBoardState,
         checkWinner
-    }
+    };
 })();
 
 const Player = (playerSide) => {
@@ -66,19 +66,11 @@ const Player = (playerSide) => {
     
     return {
         side
-    }
+    };
 };
-
-const displayController = (() => {
-    
-    return {
-
-    }
-})();
 
 // used for controlling the game flow
 const game = (() => {
-    const board = gameBoard;
     let player1;
     let player2;
     let currentPlayer;
@@ -96,7 +88,7 @@ const game = (() => {
     const checkRoundState = () => {
         if(board.checkWinner(currentPlayer)) {
             // write win logic
-            console.log(`${currentPlayer} won this round!`)
+            console.log(`${currentPlayer.side} won this round!`)
             newRound();
         }
         // write draw logic
@@ -104,7 +96,7 @@ const game = (() => {
 
     const makeMove = (row, column) => {
         if(board.registerMove(currentPlayer, row, column)) {
-            // if the move was legal check for win or draw
+            // the move was legal so check for win or draw
             checkRoundState();
             // if the game hasn't ended switch to next player
             currentPlayer = currentPlayer === player1 ? player2 : player1;
@@ -112,6 +104,10 @@ const game = (() => {
             // do nothing and let the same player make another move
         }
 
+    }
+
+    const getCurrentPlayer = () => {
+        return currentPlayer;
     }
 
     const getBoardState = () => {
@@ -122,6 +118,35 @@ const game = (() => {
     return {
         newGame,
         makeMove,
-        getBoardState
-    }
+        getBoardState,
+        getCurrentPlayer
+    };
 })();
+
+const displayController = (() => {
+    const boardDisplay = document.querySelector(".game-board");
+
+    const squareClick = (e) => {
+        let square = e.target;
+        if(Array.from(square.classList).includes("board-square")) {
+            let coordinates = square.getAttribute("data-coordinate").split('-');
+            let squareRow = coordinates[0];
+            let squareCol = coordinates[1];
+            if(square.textContent != 'X' && square.textContent != 'O') {
+                square.textContent = game.getCurrentPlayer().side;
+                game.makeMove(squareRow, squareCol);
+            }
+        }
+    }
+
+    const connectHandlers = () => {
+        boardDisplay.addEventListener('click', squareClick);
+    }
+
+    return {
+        connectHandlers
+    };
+})();
+
+game.newGame();
+displayController.connectHandlers();
