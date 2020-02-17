@@ -1,3 +1,36 @@
+const UIRender = (() => {
+    const boardDisplay = document.querySelector(".game-board");
+
+    const createSquare = (coordinates) => {
+        let square = document.createElement("div");
+        square.classList.add("board-square");
+        square.setAttribute("data-coordinate", coordinates);
+        return square;
+    }
+
+    const renderBoard = () => {
+        for(let i = 0; i < 3; i++) {
+            for(let j = 0; j < 3; j++) {
+                boardDisplay.appendChild(createSquare(`${i}-${j}`))
+            }
+        }
+    }
+
+    const clearBoard = () => {
+        boardDisplay.innerHTML = '';
+    }
+
+    const resetBoard = () => {
+        clearBoard();
+        renderBoard();
+    }
+
+    return {
+        renderBoard,
+        resetBoard
+    }
+})();
+
 // used for tracking board state
 const board = (() => {
     const WINNING_COMBINATIONS = [
@@ -7,7 +40,7 @@ const board = (() => {
         [[0, 0], [1, 0], [2, 0]],
         [[0, 1], [1, 1], [2, 1]],
         [[0, 2], [1, 2], [2, 2]],
-        [[0, 1], [1, 1], [2, 2]],
+        [[0, 0], [1, 1], [2, 2]],
         [[0, 2], [1, 1], [2, 0]],
     ]
 
@@ -21,22 +54,6 @@ const board = (() => {
         } else {
             return false;
         }
-    };
-
-    const getBoardState = () => {
-        // debugging function
-        let boardString = '';
-        for(let i = 0; i < 3; i++) {
-            for(let j = 0; j < 3; j++) {
-                if(boardArray[i][j] === undefined) {
-                    boardString += ' _ ';
-                } else {
-                    boardString += ` ${boardArray[i][j]} `;
-                }
-            }
-            boardString += '\n'
-        }
-        console.log(boardString);
     };
 
     const checkWinner = (player) => {
@@ -135,15 +152,9 @@ const game = (() => {
         return currentPlayer;
     }
 
-    const getBoardState = () => {
-        // debugging function
-        board.getBoardState()
-    }
-
     return {
         newGame,
         makeMove,
-        getBoardState,
         getCurrentPlayer
     };
 })();
@@ -154,13 +165,17 @@ const displayController = (() => {
     const squareClick = (e) => {
         let square = e.target;
         if(Array.from(square.classList).includes("board-square")) {
+            // extract coordinates from the element's data attribute
             let coordinates = square.getAttribute("data-coordinate").split('-');
             let squareRow = coordinates[0];
             let squareCol = coordinates[1];
+            // check if square is taken
             if(square.textContent != 'X' && square.textContent != 'O') {
                 square.textContent = game.getCurrentPlayer().side;
+                // if the round has ended
                 if(game.makeMove(squareRow, squareCol)) {
                     // write code that redraws the board
+                    UIRender.resetBoard();
                 }
             }
         }
@@ -175,5 +190,6 @@ const displayController = (() => {
     };
 })();
 
+UIRender.renderBoard();
 game.newGame();
 displayController.connectHandlers();
