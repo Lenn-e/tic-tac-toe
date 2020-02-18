@@ -2,8 +2,10 @@ const UIRender = (() => {
     const boardDisplay = document.querySelector(".game-board");
     const gameSetupDisplay = document.querySelector(".game-setup");
     const winnerDisplay = document.querySelector(".winner-display");
-    const oSideScoreDisplay = document.querySelector(".score[data-side=O]");
-    const xSideScoreDisplay = document.querySelector(".score[data-side=X]");
+    const oSideScoreDisplay = document.querySelector(".player-container[data-side=O] .score");
+    const xSideScoreDisplay = document.querySelector(".player-container[data-side=X] .score");
+    const oSideNameDisplay = document.querySelector(".player-container[data-side=O] .player-name");
+    const xSideNameDisplay = document.querySelector(".player-container[data-side=X] .player-name");
 
     const createSquare = (coordinates) => {
         let square = document.createElement("div");
@@ -30,11 +32,13 @@ const UIRender = (() => {
     }
 
     const resetScores = () => {
-
+        oSideScoreDisplay.textContent = 0;
+        xSideScoreDisplay.textContent = 0;
     }
 
     const resetNames = () => {
-
+        oSideNameDisplay.textContent = 'P2';
+        xSideNameDisplay.textContent = 'P1';
     }
 
     const switchMainDisplay = () => {
@@ -50,8 +54,12 @@ const UIRender = (() => {
         }
     }
 
-    const updatePlayerNameDisplay = (playerName) => {
-
+    const updatePlayerNameDisplay = (player) => {
+        if(player.side === "X") {
+            xSideNameDisplay.textContent = player.name;
+        } else {
+            oSideNameDisplay.textContent = player.name;
+        }
     }
 
     const updatePlayerScoreDisplay = (playerSide) => {
@@ -75,6 +83,8 @@ const UIRender = (() => {
     }
 
     const restartGameDisplay = () => {
+        resetNames();
+        resetScores();
         clearBoard();
         clearRoundWinner();
         switchMainDisplay();
@@ -86,7 +96,8 @@ const UIRender = (() => {
         switchMainDisplay,
         displayRoundWinner,
         restartGameDisplay,
-        updateRoundWinner
+        updateRoundWinner,
+        updatePlayerNameDisplay
     }
 })();
 
@@ -171,7 +182,9 @@ const game = (() => {
 
     const newGame = (p1name, p2name) => {
         player1 = Player(p1name, 'X');
+        UIRender.updatePlayerNameDisplay(player1);
         player2 = Player(p2name, 'O');
+        UIRender.updatePlayerNameDisplay(player2);
         currentPlayer = player1;
     }
 

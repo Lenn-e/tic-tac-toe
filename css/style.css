@@ -19,7 +19,7 @@
     padding: 10px;
 }
 
-.player-score {
+.player-container {
     display: flex;
     flex-direction: column;
     width: 100px;
