@@ -1,5 +1,7 @@
 const UIRender = (() => {
     const boardDisplay = document.querySelector(".game-board");
+    const gameSetupDisplay = document.querySelector(".game-setup");
+    const winnerDisplay = document.querySelector(".winner-display");
 
     const createSquare = (coordinates) => {
         let square = document.createElement("div");
@@ -25,13 +27,38 @@ const UIRender = (() => {
         renderBoard();
     }
 
+    const switchMainDisplay = () => {
+        gameSetupDisplay.classList.toggle("hidden");
+        boardDisplay.classList.toggle("hidden");
+    }
+
+    const displayRoundWinner = (winner) => {
+        if(winner === 'draw') {
+            winnerDisplay.textContent = `It's a draw.`;
+        } else {
+            winnerDisplay.textContent = `${winner} won this round!`;
+        }
+    }
+
+    const clearRoundWinner = () => {
+        winnerDisplay.textContent = '';
+    }
+
+    const restartGameDisplay = () => {
+        clearBoard();
+        clearRoundWinner();
+        switchMainDisplay();
+    }
+
     return {
         renderBoard,
-        resetBoard
+        resetBoard,
+        switchMainDisplay,
+        displayRoundWinner,
+        restartGameDisplay
     }
 })();
 
-// used for tracking board state
 const board = (() => {
     const WINNING_COMBINATIONS = [
         [[0, 0], [0, 1], [0, 2]],
@@ -93,12 +120,14 @@ const board = (() => {
     };
 })();
 
-const Player = (playerSide) => {
+const Player = (playerName, playerSide) => {
+    let name = playerName;
     let side = playerSide;
     let score = 0;
     
     return {
-        side
+        side,
+        name
     };
 };
 
@@ -108,9 +137,9 @@ const game = (() => {
     let player2;
     let currentPlayer;
 
-    const newGame = () => {
-        player1 = Player('X');
-        player2 = Player('O');
+    const newGame = (p1name, p2name) => {
+        player1 = Player(p1name, 'X');
+        player2 = Player(p2name, 'O');
         currentPlayer = player1;
     }
 
@@ -118,16 +147,24 @@ const game = (() => {
         board.reset()
     }
 
+    const roundWon = () => {
+        UIRender.displayRoundWinner(currentPlayer.name);
+        newRound();
+        return true;
+    }
+
+    const roundDraw = () => {
+        UIRender.displayRoundWinner('draw');
+        newRound();
+        return true;
+    }
+
     const checkRoundState = () => {
+        // return true if round is over
         if(board.checkWinner(currentPlayer)) {
-            // write win logic
-            console.log(`${currentPlayer.side} won this round!`)
-            newRound();
-            return true;
+            return roundWon();
         } else if(board.checkDraw()) {
-            console.log("It's a draw");
-            newRound();
-            return true;
+            return roundDraw();
         }
         return false;
     }
@@ -135,12 +172,12 @@ const game = (() => {
     const makeMove = (row, column) => {
         if(board.registerMove(currentPlayer, row, column)) {
             // the move was legal so check for win or draw
-            let isGameOver = checkRoundState();
+            let isRoundOver = checkRoundState();
             // if the game hasn't ended switch to next player
             currentPlayer = currentPlayer === player1 ? player2 : player1;
             
-            // return boolean that lets the controller know if the game is over
-            return isGameOver;
+            // return boolean that lets the controller know if the round is over
+            return isRoundOver;
         } else {
             // do nothing and let the same player make another move
         }
@@ -160,6 +197,25 @@ const game = (() => {
 
 const displayController = (() => {
     const boardDisplay = document.querySelector(".game-board");
+    const startGameBtn = document.querySelector(".start-btn");
+    const restartGameBtn = document.querySelector(".restart-btn");
+    const player1Name = document.querySelector("#player1-name");
+    const player2Name = document.querySelector("#player2-name");
+
+    const startGame = (e) => {
+        checkNameValidity();
+        startGameBtn.disabled = true;
+        restartGameBtn.disabled = false;
+        game.newGame(player1Name.value, player2Name.value);
+        UIRender.renderBoard();
+        UIRender.switchMainDisplay();
+    }
+
+    const restartGame = (e) => {
+        startGameBtn.disabled = false;
+        restartGameBtn.disabled = true;
+        UIRender.restartGameDisplay();
+    }
 
     const squareClick = (e) => {
         let square = e.target;
@@ -169,11 +225,11 @@ const displayController = (() => {
             let squareRow = coordinates[0];
             let squareCol = coordinates[1];
             // check if square is taken
+            // REFACTOR AS A UIRENDER METHOD
             if(square.textContent != 'X' && square.textContent != 'O') {
                 square.textContent = game.getCurrentPlayer().side;
                 // if the round has ended
                 if(game.makeMove(squareRow, squareCol)) {
-                    // write code that redraws the board
                     UIRender.resetBoard();
                 }
             }
@@ -182,6 +238,8 @@ const displayController = (() => {
 
     const connectHandlers = () => {
         boardDisplay.addEventListener('click', squareClick);
+        startGameBtn.addEventListener('click', startGame);
+        restartGameBtn.addEventListener('click', restartGame);
     }
 
     return {
@@ -189,6 +247,4 @@ const displayController = (() => {
     };
 })();
 
-UIRender.renderBoard();
-game.newGame();
 displayController.connectHandlers();
