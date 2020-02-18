@@ -2,6 +2,8 @@ const UIRender = (() => {
     const boardDisplay = document.querySelector(".game-board");
     const gameSetupDisplay = document.querySelector(".game-setup");
     const winnerDisplay = document.querySelector(".winner-display");
+    const oSideScoreDisplay = document.querySelector(".score[data-side=O]");
+    const xSideScoreDisplay = document.querySelector(".score[data-side=X]");
 
     const createSquare = (coordinates) => {
         let square = document.createElement("div");
@@ -27,16 +29,44 @@ const UIRender = (() => {
         renderBoard();
     }
 
+    const resetScores = () => {
+
+    }
+
+    const resetNames = () => {
+
+    }
+
     const switchMainDisplay = () => {
         gameSetupDisplay.classList.toggle("hidden");
         boardDisplay.classList.toggle("hidden");
     }
 
-    const displayRoundWinner = (winner) => {
-        if(winner === 'draw') {
+    const displayRoundWinner = (playerName) => {
+        if(playerName === 'draw') {
             winnerDisplay.textContent = `It's a draw.`;
         } else {
-            winnerDisplay.textContent = `${winner} won this round!`;
+            winnerDisplay.textContent = `${playerName} won this round!`;
+        }
+    }
+
+    const updatePlayerNameDisplay = (playerName) => {
+
+    }
+
+    const updatePlayerScoreDisplay = (playerSide) => {
+        if(playerSide === "X") {
+            xSideScoreDisplay.textContent = Number(xSideScoreDisplay.textContent) + 1;
+        } else {
+            oSideScoreDisplay.textContent = Number(oSideScoreDisplay.textContent) + 1;
+        }
+    }
+
+    const updateRoundWinner = (winner, playerSide=null) => {
+        displayRoundWinner(winner);
+        // there is no side arg if it was a draw since we aren't increasing the score
+        if(playerSide) {
+            updatePlayerScoreDisplay(playerSide);
         }
     }
 
@@ -55,7 +85,8 @@ const UIRender = (() => {
         resetBoard,
         switchMainDisplay,
         displayRoundWinner,
-        restartGameDisplay
+        restartGameDisplay,
+        updateRoundWinner
     }
 })();
 
@@ -127,7 +158,8 @@ const Player = (playerName, playerSide) => {
     
     return {
         side,
-        name
+        name,
+        score
     };
 };
 
@@ -148,13 +180,14 @@ const game = (() => {
     }
 
     const roundWon = () => {
-        UIRender.displayRoundWinner(currentPlayer.name);
+        currentPlayer.score++;
+        UIRender.updateRoundWinner(currentPlayer.name, currentPlayer.side);
         newRound();
         return true;
     }
 
     const roundDraw = () => {
-        UIRender.displayRoundWinner('draw');
+        UIRender.updateRoundWinner('draw');
         newRound();
         return true;
     }
@@ -203,7 +236,6 @@ const displayController = (() => {
     const player2Name = document.querySelector("#player2-name");
 
     const startGame = (e) => {
-        checkNameValidity();
         startGameBtn.disabled = true;
         restartGameBtn.disabled = false;
         game.newGame(player1Name.value, player2Name.value);
