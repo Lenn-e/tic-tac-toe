@@ -1,12 +1,113 @@
+:root {
+    
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    width: 500px;
+    height: 500px;
+    border: 1px solid black;
+    margin: 100px auto;
+}
+
+.scoreboard {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    margin-top: 20px;
+    padding: 10px;
+}
+
+.player-score {
+    display: flex;
+    flex-direction: column;
+    width: 100px;
+}
+
+.player-info {
+    border: 1px solid black;
+    line-height: 30px;
+}
+
+.player-side {
+    float: left;
+    text-align: center;
+    width: 30%;
+}
+
+.player-name {
+    float: right;
+    width: 70%;
+    border-left: 1px solid black;
+    text-align: center;
+    
+}
+
+.score {
+    border: 1px solid blue;
+    border-top: none;
+    width: 70%;
+    align-self: flex-end;
+    text-align: center;
+}
+
+.winner-display {
+    text-align: center;
+    line-height: 30px;
+    margin: 10px 0;
+    border: 1px solid black;
+}
+
+.main-display {
+    margin: 10px 0;
+}
+
+.mode-select {
+
+}
+
 .game-board {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
     width: 300px;
     height: 300px;
-    margin: 100px auto;
+    margin: 0 auto;
 }
 
 .board-square {
-    border: 1px solid black;
+    border-color: black;
+    border-style: solid;
+}
+.board-square[data-coordinate="0-0"] {
+    border-width: 0 1px 1px 0;
+}
+.board-square[data-coordinate="0-1"] {
+    border-width: 0 1px 1px 1px;
+}
+.board-square[data-coordinate="0-2"] {
+    border-width: 0 0 1px 1px;
+}
+.board-square[data-coordinate="1-0"] {
+    border-width: 1px 1px 1px 0;
+}
+.board-square[data-coordinate="1-1"] {
+    border-width: 1px;
+}
+.board-square[data-coordinate="1-2"] {
+    border-width: 1px 0 1px 1px;
+}
+.board-square[data-coordinate="2-0"] {
+    border-width: 1px 1px 0 0;
+}
+.board-square[data-coordinate="2-1"] {
+    border-width: 1px 1px 0 1px;
+}
+.board-square[data-coordinate="2-2"] {
+    border-width: 1px 0 0 1px;
+}
+
+.game-settings {
+    border-top: 1px solid black;
 }

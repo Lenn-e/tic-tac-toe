@@ -87,7 +87,6 @@ const board = (() => {
 
     return {
         registerMove,
-        getBoardState,
         checkWinner,
         checkDraw,
         reset
