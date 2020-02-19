@@ -53,7 +53,10 @@ const UIRender = (() => {
         boardDisplay.innerHTML = '';
     }
 
-    const resetBoard = () => {
+    const resetBoard = (e) => {
+        if(e) {
+            e.stopPropagation();
+        }
         clearBoard();
         renderBoard();
     }
@@ -122,14 +125,21 @@ const UIRender = (() => {
         winnerDisplay.textContent = '';
     }
 
-    const toggleClipAnimation = () => {
+    const toggleMainDisplayClipAnimation = () => {
         mainDisplay.classList.toggle("clip-out-in");
+    }
+
+    const toggleBoardDisplaySlideAnimation = (e) => {
+        if(e) {
+            e.stopPropagation();
+        }
+        boardDisplay.classList.toggle("slide-out-in");
     }
 
     const startGameDisplay = () => {
         toggleDisableButtons();
         resetBoard();
-        toggleClipAnimation();
+        toggleMainDisplayClipAnimation();
     }
 
     const restartGameDisplay = () => {
@@ -137,7 +147,7 @@ const UIRender = (() => {
         resetNames();
         resetScores();
         clearRoundWinner();
-        toggleClipAnimation();
+        toggleMainDisplayClipAnimation();
     }
 
     return {
@@ -148,7 +158,8 @@ const UIRender = (() => {
         updateRoundWinner,
         updatePlayerNameDisplay,
         switchMainDisplay,
-        toggleClipAnimation,
+        toggleMainDisplayClipAnimation,
+        toggleBoardDisplaySlideAnimation,
         renderSideChar
     }
 })();
@@ -332,20 +343,22 @@ const displayController = (() => {
             let squareCol = coordinates[1];
 
             UIRender.renderSideChar(square, game.getCurrentPlayer())
-            
+
             if(game.makeMove(squareRow, squareCol)) {
                 // if the round has ended reset the board display
-                UIRender.resetBoard();
+                UIRender.toggleBoardDisplaySlideAnimation();
             }
         }
     }
 
     const connectHandlers = () => {
         boardDisplay.addEventListener('click', squareClick);
+        boardDisplay.addEventListener('animationiteration', UIRender.resetBoard);
+        boardDisplay.addEventListener('animationend', UIRender.toggleBoardDisplaySlideAnimation);
         startGameBtn.addEventListener('click', startGame);
         restartGameBtn.addEventListener('click', restartGame);
         mainDisplay.addEventListener('animationiteration', UIRender.switchMainDisplay);
-        mainDisplay.addEventListener('animationend', UIRender.toggleClipAnimation);
+        mainDisplay.addEventListener('animationend', UIRender.toggleMainDisplayClipAnimation);
     }
 
     return {
