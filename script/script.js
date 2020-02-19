@@ -7,6 +7,8 @@ const UIRender = (() => {
     const xSideScoreDisplay = document.querySelector(".player-container[data-side=X] .score");
     const oSideNameDisplay = document.querySelector(".player-container[data-side=O] .player-name");
     const xSideNameDisplay = document.querySelector(".player-container[data-side=X] .player-name");
+    const oSidePlayerContainer = document.querySelector(".player-container[data-side=O] .player-info");
+    const xSidePlayerContainer = document.querySelector(".player-container[data-side=X] .player-info");
     const startGameBtn = document.querySelector(".start-btn");
     const restartGameBtn = document.querySelector(".restart-btn");
 
@@ -24,6 +26,25 @@ const UIRender = (() => {
         square.appendChild(sideCharacterCover);
 
         return square;
+    }
+
+    const highlightCurrentPlayer = () => {
+        // if there's a game in progress highlight the current player otherwise remove highlights
+        if(game.getCurrentPlayer()) {
+            let side = game.getCurrentPlayer().side;
+
+            if(side === "X") {
+                xSidePlayerContainer.classList.add("current-player");
+                oSidePlayerContainer.classList.remove("current-player");
+            } else {
+                xSidePlayerContainer.classList.remove("current-player");
+                oSidePlayerContainer.classList.add("current-player");
+            }
+
+        } else {
+            oSidePlayerContainer.classList.remove("current-player");
+            xSidePlayerContainer.classList.remove("current-player");
+        }
     }
 
     const renderSideChar = (square, player) => {
@@ -137,6 +158,7 @@ const UIRender = (() => {
     }
 
     const startGameDisplay = () => {
+        highlightCurrentPlayer();
         toggleDisableButtons();
         resetBoard();
         toggleMainDisplayClipAnimation();
@@ -148,6 +170,7 @@ const UIRender = (() => {
         resetScores();
         clearRoundWinner();
         toggleMainDisplayClipAnimation();
+        highlightCurrentPlayer();
     }
 
     return {
@@ -160,7 +183,8 @@ const UIRender = (() => {
         switchMainDisplay,
         toggleMainDisplayClipAnimation,
         toggleBoardDisplaySlideAnimation,
-        renderSideChar
+        renderSideChar,
+        highlightCurrentPlayer
     }
 })();
 
@@ -348,6 +372,8 @@ const displayController = (() => {
                 // if the round has ended reset the board display
                 UIRender.toggleBoardDisplaySlideAnimation();
             }
+
+            UIRender.highlightCurrentPlayer();
         }
     }
 
