@@ -1,4 +1,5 @@
 const UIRender = (() => {
+    const mainDisplay = document.querySelector(".main-display");
     const boardDisplay = document.querySelector(".game-board");
     const gameSetupDisplay = document.querySelector(".game-setup");
     const winnerDisplay = document.querySelector(".winner-display");
@@ -6,6 +7,8 @@ const UIRender = (() => {
     const xSideScoreDisplay = document.querySelector(".player-container[data-side=X] .score");
     const oSideNameDisplay = document.querySelector(".player-container[data-side=O] .player-name");
     const xSideNameDisplay = document.querySelector(".player-container[data-side=X] .player-name");
+    const startGameBtn = document.querySelector(".start-btn");
+    const restartGameBtn = document.querySelector(".restart-btn");
 
     const createSquare = (coordinates) => {
         let square = document.createElement("div");
@@ -46,6 +49,19 @@ const UIRender = (() => {
         boardDisplay.classList.toggle("hidden");
     }
 
+    const toggleDisableButtons = () => {
+        if(startGameBtn.disabled) {
+            startGameBtn.disabled = false;
+        } else {
+            startGameBtn.disabled = true;
+        }
+        if(restartGameBtn.disabled) {
+            restartGameBtn.disabled = false;
+        } else {
+            restartGameBtn.disabled = true;
+        }
+    }
+
     const displayRoundWinner = (playerName) => {
         if(playerName === 'draw') {
             winnerDisplay.textContent = `It's a draw.`;
@@ -82,22 +98,33 @@ const UIRender = (() => {
         winnerDisplay.textContent = '';
     }
 
+    const toggleClipAnimation = () => {
+        mainDisplay.classList.toggle("clip-out-in");
+    }
+
+    const startGameDisplay = () => {
+        toggleDisableButtons();
+        resetBoard();
+        toggleClipAnimation();
+    }
+
     const restartGameDisplay = () => {
+        toggleDisableButtons();
         resetNames();
         resetScores();
-        clearBoard();
         clearRoundWinner();
-        switchMainDisplay();
+        toggleClipAnimation();
     }
 
     return {
-        renderBoard,
         resetBoard,
-        switchMainDisplay,
         displayRoundWinner,
+        startGameDisplay,
         restartGameDisplay,
         updateRoundWinner,
-        updatePlayerNameDisplay
+        updatePlayerNameDisplay,
+        switchMainDisplay,
+        toggleClipAnimation
     }
 })();
 
@@ -158,7 +185,8 @@ const board = (() => {
         registerMove,
         checkWinner,
         checkDraw,
-        reset
+        reset,
+        boardArray
     };
 })();
 
@@ -174,7 +202,6 @@ const Player = (playerName, playerSide) => {
     };
 };
 
-// used for controlling the game flow
 const game = (() => {
     let player1;
     let player2;
@@ -186,6 +213,13 @@ const game = (() => {
         player2 = Player(p2name, 'O');
         UIRender.updatePlayerNameDisplay(player2);
         currentPlayer = player1;
+    }
+
+    const restartGame = () => {
+        player1 = undefined;
+        player2 = undefined;
+        currentPlayer = undefined;
+        board.reset();
     }
 
     const newRound = () => {
@@ -237,11 +271,13 @@ const game = (() => {
     return {
         newGame,
         makeMove,
-        getCurrentPlayer
+        getCurrentPlayer,
+        restartGame
     };
 })();
 
 const displayController = (() => {
+    const mainDisplay = document.querySelector(".main-display");
     const boardDisplay = document.querySelector(".game-board");
     const startGameBtn = document.querySelector(".start-btn");
     const restartGameBtn = document.querySelector(".restart-btn");
@@ -249,16 +285,12 @@ const displayController = (() => {
     const player2Name = document.querySelector("#player2-name");
 
     const startGame = (e) => {
-        startGameBtn.disabled = true;
-        restartGameBtn.disabled = false;
         game.newGame(player1Name.value, player2Name.value);
-        UIRender.renderBoard();
-        UIRender.switchMainDisplay();
+        UIRender.startGameDisplay();
     }
 
     const restartGame = (e) => {
-        startGameBtn.disabled = false;
-        restartGameBtn.disabled = true;
+        game.restartGame();
         UIRender.restartGameDisplay();
     }
 
@@ -270,7 +302,7 @@ const displayController = (() => {
             let squareRow = coordinates[0];
             let squareCol = coordinates[1];
             // check if square is taken
-            // REFACTOR AS A UIRENDER METHOD
+            // REFACTOR AS A UIRENDER METHOD drawSymbol() that returns true if the square was empty
             if(square.textContent != 'X' && square.textContent != 'O') {
                 square.textContent = game.getCurrentPlayer().side;
                 // if the round has ended
@@ -285,6 +317,8 @@ const displayController = (() => {
         boardDisplay.addEventListener('click', squareClick);
         startGameBtn.addEventListener('click', startGame);
         restartGameBtn.addEventListener('click', restartGame);
+        mainDisplay.addEventListener('animationiteration', UIRender.switchMainDisplay);
+        mainDisplay.addEventListener('animationend', UIRender.toggleClipAnimation);
     }
 
     return {
