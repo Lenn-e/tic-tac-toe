@@ -14,7 +14,31 @@ const UIRender = (() => {
         let square = document.createElement("div");
         square.classList.add("board-square");
         square.setAttribute("data-coordinate", coordinates);
+
+        let sideCharacter = document.createElement("div");
+        sideCharacter.classList.add("side-char");
+        let sideCharacterCover = document.createElement("div");
+        sideCharacterCover.classList.add("side-char-cover");
+
+        square.appendChild(sideCharacter);
+        square.appendChild(sideCharacterCover);
+
         return square;
+    }
+
+    const renderSideChar = (square, player) => {
+        let sideCharDisplay = square.querySelector('.side-char');
+        if(sideCharDisplay.innerHTML === '') {
+            if(player.side === "X") {
+                sideCharDisplay.innerHTML = '&times;';
+            } else {
+                sideCharDisplay.innerHTML = '&#65518;';
+                sideCharDisplay.style.padding = "10px 0 0 0";
+            }
+            // return true if the move was possible
+            return true;
+        }
+        return false;
     }
 
     const renderBoard = () => {
@@ -124,7 +148,8 @@ const UIRender = (() => {
         updateRoundWinner,
         updatePlayerNameDisplay,
         switchMainDisplay,
-        toggleClipAnimation
+        toggleClipAnimation,
+        renderSideChar
     }
 })();
 
@@ -295,20 +320,22 @@ const displayController = (() => {
     }
 
     const squareClick = (e) => {
-        let square = e.target;
-        if(Array.from(square.classList).includes("board-square")) {
+        if(Array.from(e.target.classList).includes("side-char-cover")) {
+            let squareCover = e.target;
+            squareCover.classList.add("clipped-cover");
+        
+            let square = squareCover.parentNode;
+        
             // extract coordinates from the element's data attribute
             let coordinates = square.getAttribute("data-coordinate").split('-');
             let squareRow = coordinates[0];
             let squareCol = coordinates[1];
-            // check if square is taken
-            // REFACTOR AS A UIRENDER METHOD drawSymbol() that returns true if the square was empty
-            if(square.textContent != 'X' && square.textContent != 'O') {
-                square.textContent = game.getCurrentPlayer().side;
-                // if the round has ended
-                if(game.makeMove(squareRow, squareCol)) {
-                    UIRender.resetBoard();
-                }
+
+            UIRender.renderSideChar(square, game.getCurrentPlayer())
+            
+            if(game.makeMove(squareRow, squareCol)) {
+                // if the round has ended reset the board display
+                UIRender.resetBoard();
             }
         }
     }
